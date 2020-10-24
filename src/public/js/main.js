@@ -1,4 +1,5 @@
 const ONLINE = io();
+let ID = null;
 
 const gtx = document.querySelector("canvas").getContext("2d");
 gtx.canvas.width = window.innerWidth;
@@ -13,15 +14,14 @@ const Keys = [{
     codeLower: 0
 }];
 Keys.pop();
+
 window.onkeydown = e => {
     const K = e.key.length == 1 ? e.key.toUpperCase().charCodeAt(0) : -1;
     let Found = false;
-    let FoundPos = 0;
 
     Keys.find((e, i) => {
         if (e.code == K) {
             Found = true;
-            FoundPos = i;
         }
     });
 
@@ -65,17 +65,27 @@ setInterval(() => {
         if (k.code == 68) K[3] = 1;
     }
 
-    if (G) {
-        ONLINE.emit("update", K.join(""));
+    if (G && ID !== null) {
+        ONLINE.emit("update", ID + K.join(""));
     }
 }, 1000 / 20);
 
-let S = "";
+
+//#region --- Setup ID
+setTimeout(() => {
+    console.log(ONLINE.id);
+    ONLINE.emit("set", ONLINE.id);
+}, 200);
+
+ONLINE.on("set", data => {
+    ID = data.id == ONLINE.id ? data.playerId : 0;
+});
+//#endregion
+
 ONLINE.on("update", (data) => {
+    if(ID === null) return;
     gtx.fillStyle = "#FFF";
     gtx.fillRect(0, 0, gtx.canvas.width, gtx.canvas.height);
-    console.log(data);
-    S = data;
 
     const SP = data.split("|");
     const totalPlayers = SP[0];
@@ -89,7 +99,7 @@ ONLINE.on("update", (data) => {
         }
         const color = playerValues[3];
 
-        gtx.fillStyle = "#" + color;
+        gtx.fillStyle = parseInt(playerValues[0]) === ID ? ("#00F00F") : ("#" + color);
         gtx.fillRect(pos.x, pos.y, 50, 50);
     }
 })

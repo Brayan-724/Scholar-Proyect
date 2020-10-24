@@ -100,10 +100,11 @@ class Game {
     }
 
     addPlayer(_Pos = new Vector(2), color = "FF0000") {
-        this.playersInfo.push(new Player(this.playersInfo.length, _Pos, color));
+        const player = new Player(this.playersInfo.length, _Pos, color);
+        this.playersInfo.push(player);
         this.totalPlayers += 1;
 
-        return this;
+        return player;
     }
 
     movePlayer(Id = 0, DirectionX = 1, DirectionY = 1) {

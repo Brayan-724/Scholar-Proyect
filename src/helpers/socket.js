@@ -23,24 +23,29 @@ module.exports = {
 
 
         io.on("connect", SOCKET => {
-            game.addPlayer();
+            SOCKET.on("set", ID => {
+                io.emit("set", {playerId: game.addPlayer().Id, id: ID});
+            });
+
             SOCKET.on("update", (keysPressed) => {
-                const W = keysPressed[0];
-                const S = keysPressed[1];
-                const A = keysPressed[2];
-                const D = keysPressed[3];
+                const LetterInit = 1;
+                const ID = parseInt(keysPressed[0]);
+                const W = keysPressed[LetterInit + 0];
+                const S = keysPressed[LetterInit + 1];
+                const A = keysPressed[LetterInit + 2];
+                const D = keysPressed[LetterInit + 3];
 
                 if(W == "1") {
-                    game.movePlayer(0, 1, 0);
+                    game.movePlayer(ID, 1, 0);
                 }
                 if(S == "1") {
-                    game.movePlayer(0, 1, 2);
+                    game.movePlayer(ID, 1, 2);
                 }
                 if(A == "1") {
-                    game.movePlayer(0, 0, 1);
+                    game.movePlayer(ID, 0, 1);
                 }
                 if(D == "1") {
-                    game.movePlayer(0, 2, 1);
+                    game.movePlayer(ID, 2, 1);
                 }
             });
         });
