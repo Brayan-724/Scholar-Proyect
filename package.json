@@ -1,0 +1,25 @@
+{
+  "name": "Test-Online",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "publish": "git add . && git commit -am \"Auto-publish\" && git push heroku master",
+    "compileGameTs": "cd ./src/helpers && ts game.ts",
+    "compileTypescripts": "npm run compileGameTs",
+    "compileTs": "npm run compileTypescripts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "@types/node": "^14.14.2",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
