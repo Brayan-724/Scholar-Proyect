@@ -71,7 +71,7 @@ setInterval(() => {
 }, 1000 / 24);
 
 
-//#region --- Setup ID
+//#region --- Setup
 setTimeout(() => {
     console.log(ONLINE.id);
     ONLINE.emit("set", ONLINE.id);
@@ -79,6 +79,7 @@ setTimeout(() => {
 
 ONLINE.on("set", data => {
     ID = data.id == ONLINE.id ? data.playerId : 0;
+    console.log(data.map);
 });
 //#endregion
 

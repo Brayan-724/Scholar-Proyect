@@ -33,7 +33,10 @@ module.exports = {
 
         io.on("connect", SOCKET => {
             SOCKET.on("set", ID => {
-                io.emit("set", {playerId: game.addPlayer().Id, id: ID});
+                io.emit("set", {
+                    playerId: game.addPlayer().Id, 
+                    id: ID, 
+                    map: levelManager.levels[1]});
             });
 
             SOCKET.on("update", (keysPressed) => {

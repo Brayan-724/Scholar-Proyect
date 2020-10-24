@@ -33,6 +33,40 @@ class Vector {
         this.z = _z || 0;
     }
 
+    add(add, apply = false) {
+        if(add instanceof Vector) {
+            if(apply) {
+                this.x += add.x;
+                this.y += add.y;
+            }
+            return new Vector(2, Vec.x + add.x, Vec.y + add.y);
+        }
+        if(typeof add == "number") {
+            if(apply) {
+                this.x += add;
+                this.y += add;
+            }
+            return new Vector(2, Vec.x + add, Vec.y + add);
+        }
+    }
+
+    mult(add, apply = false) {
+        if(add instanceof Vector) {
+            if(apply) {
+                this.x *= add.x;
+                this.y *= add.y;
+            }
+            return new Vector(2, Vec.x * add.x, Vec.y * add.y);
+        }
+        if(typeof add == "number") {
+            if(apply) {
+                this.x *= add;
+                this.y *= add;
+            }
+            return new Vector(2, Vec.x * add, Vec.y * add);
+        }
+    }
+
     getMag() {
         return Math.sqrt((this.x ** 2) + (this.y ** 2) + (this.z ** 2));
     }
@@ -50,6 +84,54 @@ class Vector {
         }
 
         return this.x.toString();
+    }
+}
+
+class VectorX extends Vector{constructor(X = 0) {super(2, X)}}
+class VectorY extends Vector{constructor(Y = 0) {super(2, 0, Y)}}
+class VectorAll extends Vector {constructor(N = 0) {super(2, N, N)}}
+
+class RayWall {
+    constructor(PosA = new Vector(2), PosB = new Vector(2)) {
+        this.A = PosA;
+        this.B = PosB;
+    }
+}
+
+class RayHit {
+    constructor(hitted = false, Pos = new Vector(2), Object = new hiteableObject()) {
+        this.pos = Pos;
+        this.hitted = hitted;
+        this.objectHit = Object;
+    }
+}
+
+class hiteableObject {
+    constructor(){}
+    getWalls(){ return [new RayWall()]}
+}
+
+class Block extends hiteableObject{
+    constructor(Pos = new Vector(2)) {
+        super();
+        this.width = 25;
+        this.pos = Pos.mult(this.width, true);
+
+        let Up_Left_Point = Pos;
+        let Up_Rigth_Point = Pos.add(new VectorX(this.width));
+        let Down_Left_Point = Pos.add(new VectorY(this.width));
+        let Down_Rigth_Point = Pos.add(new VectorAll(this.width));
+        
+        this.Walls = [
+            new RayWall(Up_Left_Point, Up_Rigth_Point),
+            new RayWall(Down_Left_Point, Down_Rigth_Point),
+            new RayWall(Up_Left_Point, Down_Left_Point),
+            new RayWall(Up_Rigth_Point, Down_Rigth_Point),
+        ];
+    }
+
+    getWalls() {
+        return this.Walls;
     }
 }
 
@@ -121,6 +203,8 @@ class Game {
     constructor(Players = 0) {
         this.totalPlayers = Players;
 
+        this.spawn = new Spawn();
+
         this.playersInfo = [new Player(0)]; this.playersInfo.pop();
     }
 
@@ -187,6 +271,42 @@ class Game {
     }
 }
 
+function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects = [new hiteableObject()], maxDistance = Infinity) {
+    const x3 = pos.x;
+    const y3 = pos.y;
+    const x4 = direction.x + x3;
+    const y4 = direction.y + y3;
+
+    const returnObject = new RayHit(false);
+    const record = maxDistance;
+    
+    hiteableObjects.forEach((object, objectIndex) => {
+        object.getWalls().forEach((wall, wallIndex) => {
+            const x1 = wall.A.x;
+            const y1 = wall.A.y;
+            const x2 = wall.B.x;
+            const y2 = wall.B.y;
+
+            const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if(den == 0) return;
+
+            const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+            const u = ((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+
+            if(t > 0 && t < 1 && u > 0) {
+                const x = x1 + t * (x2 - x1);
+                const y = y1 + t * (y2 - y1);
+                if(distance(pos, new Vector(2, x, y)) < record) {
+                    record = distance(pos, new Vector(2, x, y));
+                    returnObject = new RayHit(true, new Vector(2, x, y), hiteableObjects[objectIndex]);
+                } else return;
+            } else return;
+        });
+    });
+
+    return returnObject;
+}
+
 function stringToArray(str = "") {
     let out = [];
     for(let i = 0; i < str.length; i++) {
@@ -204,6 +324,10 @@ function join(...args) {
     }
 
     return resultString;
+}
+
+function distance(VecA, VecB) {
+    return Math.sqrt((VecA.x - VecB.x) + (VecA.y - VecB.y));
 }
 
 
