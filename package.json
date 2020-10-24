@@ -6,10 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "publish": "git add . && git commit -am \"Auto-publish\" && git push heroku master --force",
-    "compileGameTs": "cd ./src/helpers && ts game.ts",
-    "compileTypescripts": "npm run compileGameTs",
-    "compileTs": "npm run compileTypescripts"
+    "publish": "git add . && git commit -am \"Auto-publish\" && git push heroku master --force"
   },
   "keywords": [],
   "author": "",

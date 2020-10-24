@@ -3,7 +3,7 @@ let ID = null;
 
 const gtx = document.querySelector("canvas").getContext("2d");
 gtx.canvas.width = window.innerWidth;
-gtx.canvas.height = window.innerHeight;
+gtx.canvas.height = window.innerHeight - 5;
 
 //#region --- Keys
 const Keys = [{
@@ -68,7 +68,7 @@ setInterval(() => {
     if (G && ID !== null) {
         ONLINE.emit("update", ID + K.join(""));
     }
-}, 1000 / 20);
+}, 1000 / 24);
 
 
 //#region --- Setup ID
@@ -84,6 +84,7 @@ ONLINE.on("set", data => {
 
 ONLINE.on("update", (data) => {
     if(ID === null) return;
+    console.log(data);
     gtx.fillStyle = "#FFF";
     gtx.fillRect(0, 0, gtx.canvas.width, gtx.canvas.height);
 

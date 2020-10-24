@@ -1,5 +1,3 @@
-let Velocity = 3;
-
 // Helper with string converts
 class StringFunctions {
     encode(value = "", expectedLength = 0) {
@@ -39,7 +37,7 @@ class Vector {
         return Math.sqrt((this.x ** 2) + (this.y ** 2) + (this.z ** 2));
     }
 
-    Enum(n = 0){
+    Enum(n = 0) {
         return new StringFunctions().encode(parseInt(n), 3);
     }
 
@@ -65,13 +63,40 @@ class Player {
 
         this.Vel = new Vector(2);
 
+        this.aceleration = .5;
+        this.maxVel = 10;
+
         this.Id = Id;
     }
 
     moveTo(Direction = new Vector(2, 1, 1)) {
+        const Vel = this.Vel;
+        const maxVel = this.maxVel;
+        const aceleration = this.aceleration;
 
-        this.pos.x += Direction.x * Velocity - Velocity;
-        this.pos.y += Direction.y * Velocity - Velocity;
+        if(Direction.x == 2) Vel.x += Vel.x + aceleration > maxVel ? 0 : aceleration;
+        else
+        if(Direction.x == 1){
+            if(Vel.x > 0) Vel.x -= aceleration;
+            if(Vel.x < 0) Vel.x += aceleration;
+        } else
+        if(Direction.x == 0) Vel.x -= Vel.x - aceleration < -maxVel ? 0 : aceleration;
+        
+
+        if(Direction.y == 2) Vel.y += Vel.y + aceleration > maxVel ? 0 : aceleration;
+        else
+        if(Direction.y == 1) {
+            if(Vel.y > 0) Vel.y -= aceleration;
+            if(Vel.y < 0) Vel.y += aceleration;
+        } else
+        if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
+        
+        this.pos.x += this.Vel.x;
+        this.pos.y += this.Vel.y;
+    }
+
+    update() {
+        this.moveTo(new Vector(2, 1, 1));
     }
 
     toString() {
@@ -112,6 +137,44 @@ class Game {
             .moveTo(new Vector(2, DirectionX, DirectionY));
         
             return this;
+    }
+
+    update(
+        Keys = [{
+            Id: 0, 
+            W: false, 
+            S: false, 
+            A: false, 
+            D: false
+        }]) {
+
+        let outKeys = Keys;
+        
+        Keys.forEach((value, index) => {
+            let anyKey = value.W || value.S || value.A || value.D;
+
+            let XMove = 1;
+            let YMove = 1;
+
+            if(value.W) YMove -= 1;
+            if(value.S) YMove += 1;
+            if(value.A) XMove -= 1;
+            if(value.D) XMove += 1;
+
+            this.movePlayer(value.Id, XMove, YMove);
+
+            outKeys[value.Id] = {
+                Id: value.Id, 
+                W: false, 
+                S: false, 
+                A: false, 
+                D: false
+            };
+
+            if(!anyKey) this.playersInfo[value.Id].update();
+        });
+
+        return outKeys;
     }
 
     toString() {
