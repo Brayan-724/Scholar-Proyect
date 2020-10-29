@@ -3,8 +3,6 @@ const socketio = require("socket.io");
 const Game = require("./game");
 const levelManager = require("./levels");
 
-let actualLevel = levelManager.getLevel(levelManager.levels[1], Game.Vector, {S: Game.Spawn});
-
 let activeKeys = [{
     Id: 0, 
     W: false, 
@@ -19,6 +17,7 @@ module.exports = {
         const io = socketio.listen(server);
 
         let game = Game.InitGame();
+        game.setLevel(0);
         let lastGameStep = game.toString();
 
         setInterval(() => {
@@ -34,7 +33,7 @@ module.exports = {
         io.on("connect", SOCKET => {
             SOCKET.on("set", ID => {
                 io.emit("set", {
-                    playerId: game.addPlayer().Id, 
+                    playerId: game.addPlayer(new Game.Vector(2, 50, 50)).Id, 
                     id: ID, 
                     map: levelManager.levels[1]});
             });

@@ -2,8 +2,21 @@ const ONLINE = io();
 let ID = null;
 
 const gtx = document.querySelector("canvas").getContext("2d");
-gtx.canvas.width = window.innerWidth;
-gtx.canvas.height = window.innerHeight - 5;
+(() => {
+    const T = () => {
+        const width = window.innerWidth;
+        const heigth = window.innerHeight;
+
+        gtx.canvas.width = width;
+        gtx.canvas.height = width * 0.5;
+
+        gtx.fillStyle = "#FFF";
+        gtx.fillRect(0, 0, gtx.canvas.width, gtx.canvas.height);
+    };
+
+    window.onresize = T;
+    T();
+})()
 
 //#region --- Keys
 const Keys = [{
@@ -70,6 +83,8 @@ setInterval(() => {
     }
 }, 1000 / 24);
 
+const MapIndex = [""]; MapIndex.pop();
+const BlockImg = document.querySelector("img#blockImage");
 
 //#region --- Setup
 setTimeout(() => {
@@ -79,15 +94,38 @@ setTimeout(() => {
 
 ONLINE.on("set", data => {
     ID = data.id == ONLINE.id ? data.playerId : 0;
-    console.log(data.map);
+
+    const lines = data.map.split("-");
+    for(let y = 0; y < lines.length; y++) {
+        for (let x = 0; x < lines[y].length; x++) {
+            const letter = lines[y][x];
+
+            if(letter === "X") {
+                MapIndex.push("Block|" + x + "/" + y); // Block|0/0 (Type|CordsX/CordsY)
+            }
+        }
+    }
+    console.log(MapIndex);
 });
 //#endregion
 
 ONLINE.on("update", (data) => {
     if(ID === null) return;
-    console.log(data);
     gtx.fillStyle = "#FFF";
     gtx.fillRect(0, 0, gtx.canvas.width, gtx.canvas.height);
+
+    const Aspect = gtx.canvas.width / 20;
+
+    for(let blockString of MapIndex) {
+        const separated = blockString.split("|");
+        const type = separated[0];
+        const pos = separated[1].split("/");
+        const X = pos[0];
+        const Y = pos[1];
+
+        if(type === "Block") 
+            gtx.drawImage(BlockImg, X * Aspect, Y * Aspect, Aspect, Aspect);
+    }
 
     const SP = data.split("|");
     const totalPlayers = SP[0];
@@ -102,6 +140,6 @@ ONLINE.on("update", (data) => {
         const color = playerValues[3];
 
         gtx.fillStyle = parseInt(playerValues[0]) === ID ? ("#00F00F") : ("#" + color);
-        gtx.fillRect(pos.x, pos.y, 50, 50);
+        gtx.fillRect(pos.x, pos.y, Aspect, Aspect);
     }
 })

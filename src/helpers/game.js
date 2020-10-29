@@ -1,3 +1,6 @@
+const levelManager = require('./levels');
+const Maths = require("./Maths");
+
 // Helper with string converts
 class StringFunctions {
     encode(value = "", expectedLength = 0) {
@@ -39,14 +42,14 @@ class Vector {
                 this.x += add.x;
                 this.y += add.y;
             }
-            return new Vector(2, Vec.x + add.x, Vec.y + add.y);
+            return new Vector(2, this.x + add.x, this.y + add.y);
         }
         if(typeof add == "number") {
             if(apply) {
                 this.x += add;
                 this.y += add;
             }
-            return new Vector(2, Vec.x + add, Vec.y + add);
+            return new Vector(2, this.x + add, this.y + add);
         }
     }
 
@@ -56,15 +59,41 @@ class Vector {
                 this.x *= add.x;
                 this.y *= add.y;
             }
-            return new Vector(2, Vec.x * add.x, Vec.y * add.y);
+            return new Vector(2, this.x * add.x, this.y * add.y);
         }
         if(typeof add == "number") {
             if(apply) {
                 this.x *= add;
                 this.y *= add;
             }
-            return new Vector(2, Vec.x * add, Vec.y * add);
+            return new Vector(2, this.x * add, this.y * add);
         }
+    }
+
+    div(add, apply = false) {
+        if(add instanceof Vector) {
+            if(apply) {
+                this.x /= add.x;
+                this.y /= add.y;
+            }
+            return new Vector(2, this.x / add.x, this.y / add.y);
+        }
+        if(typeof add == "number") {
+            if(apply) {
+                this.x /= add;
+                this.y /= add;
+            }
+            return new Vector(2, this.x / add, this.y / add);
+        }
+    }
+
+    normalize() {
+        let l = this.getMag();
+
+        this.x /= l;
+        this.y /= l;
+
+        return this;
     }
 
     getMag() {
@@ -99,10 +128,16 @@ class RayWall {
 }
 
 class RayHit {
-    constructor(hitted = false, Pos = new Vector(2), Object = new hiteableObject()) {
-        this.pos = Pos;
+    constructor(hitted = false, Pos = new Vector(2), Object = new hiteableObject(), rayPos = new Vector(2)) {
         this.hitted = hitted;
+        if(!hitted) return;
+        this.pos = Pos;
         this.objectHit = Object;
+        this.rayPos = rayPos;
+
+        this.direction = new Vector(2, this.pos.x - rayPos.x, this.pos.y - rayPos.y);
+        this.angle = Maths.getAngle(dis.x, dis.y);
+        this.distance = dis.getMag();
     }
 }
 
@@ -135,6 +170,12 @@ class Block extends hiteableObject{
     }
 }
 
+class BlockXY extends Block{
+    constructor(x = 0, y = 0) {
+        super(new Vector(2, x, y));
+    }
+}
+
 // Player class
 class Player {
 
@@ -151,7 +192,24 @@ class Player {
         this.Id = Id;
     }
 
-    moveTo(Direction = new Vector(2, 1, 1)) {
+    detectAndMove(dir = new Vector(2), walls = [new Block()]) {
+        const dirNormalized = dir;
+        dirNormalized.normalize();
+
+        const ray = RayCast(this.pos, dirNormalized, walls, dir.getMag());
+
+        let mov = new Vector(2);
+
+        if(ray !== null) {
+            mov = ray.direction;
+        } else {
+            mov = dir;
+        }
+
+        this.pos.add(mov, true);
+    }
+
+    moveTo(Direction = new Vector(2, 1, 1), walls = [new Block()]) {
         const Vel = this.Vel;
         const maxVel = this.maxVel;
         const aceleration = this.aceleration;
@@ -173,8 +231,7 @@ class Player {
         } else
         if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
         
-        this.pos.x += this.Vel.x;
-        this.pos.y += this.Vel.y;
+        this.detectAndMove(Vel, walls)
     }
 
     update() {
@@ -206,6 +263,9 @@ class Game {
         this.spawn = new Spawn();
 
         this.playersInfo = [new Player(0)]; this.playersInfo.pop();
+
+        this.level = [];
+        this.levelId = 0;
     }
 
     addPlayer(_Pos = new Vector(2), color = "FF0000") {
@@ -218,9 +278,17 @@ class Game {
 
     movePlayer(Id = 0, DirectionX = 1, DirectionY = 1) {
         this.playersInfo[Id]
-            .moveTo(new Vector(2, DirectionX, DirectionY));
+            .moveTo(new Vector(2, DirectionX, DirectionY), this.level);
         
             return this;
+    }
+
+    setLevel(levelId = 0) {
+        this.levelId = levelId;
+        this.level = levelManager.getLevel(levelManager.levels[levelManager + 1], Vector, {
+            S: null,
+            X: Block
+        });
     }
 
     update(
@@ -281,7 +349,7 @@ function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects
     const record = maxDistance;
     
     hiteableObjects.forEach((object, objectIndex) => {
-        object.getWalls().forEach((wall, wallIndex) => {
+        object.getWalls().forEach((wall) => {
             const x1 = wall.A.x;
             const y1 = wall.A.y;
             const x2 = wall.B.x;
@@ -298,7 +366,7 @@ function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects
                 const y = y1 + t * (y2 - y1);
                 if(distance(pos, new Vector(2, x, y)) < record) {
                     record = distance(pos, new Vector(2, x, y));
-                    returnObject = new RayHit(true, new Vector(2, x, y), hiteableObjects[objectIndex]);
+                    returnObject = new RayHit(true, new Vector(2, x, y), hiteableObjects[objectIndex], pos);
                 } else return;
             } else return;
         });
@@ -337,5 +405,8 @@ module.exports = {
     Spawn,
     InitGame: () => new Game(0),
     Game,
-    join
+    join,
+    Block,
+    BlockXY,
+    Vector
 };

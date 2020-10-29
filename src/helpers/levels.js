@@ -1,26 +1,26 @@
 const Lvl0 = 
-[   "XXXXXXXXXXXXXXXXXXXXXXXX",
-    "X                      X",
-    "X                      X",
-    "X                      X",
-    "X                      X",
-    "X                      X",
-    "X   S                  X",
-    "XXXXXXXX               X",
-    "X                      X",
-    "X                      X",
-    "XXXXXXXXXXXXXXXXXXXXXXXX"].join("-");
+[   "XXXXXXXXXXXXXXXXXXXX",
+    "X                  X",
+    "X                  X",
+    "X         XXXXX    X",
+    "X                  X",
+    "X   S              X",
+    "XXXXXXXX           X",
+    "X                  X",
+    "X                  X",
+    "XXXXXXXXXXXXXXXXXXXX"].join("-");
 
 function getLevel(
     Level = "", 
-    VectorTemplate = class Vector{constructor(d,x,y){this.d = d;this.x = x;this.y = y}},
+    VectorTemplate = class Vector{constructor(d,x,y){this.dim = d;this.x = x;this.y = y}},
     options = {
         X: class Block{}, 
         S: class Player{}, 
         Blank: null}) {
     
-    if(options.X == undefined) options.X = class Block{}
-    if(options.S == undefined) options.S = class Player{}
+    if(options.X === undefined) options.X = class Block{}
+    if(options.S === undefined) options.S = class Player{}
+    if(options.Blank === undefined) options.Blank = null;
 
     const elements = [];
     const lines = Level.split("-");
