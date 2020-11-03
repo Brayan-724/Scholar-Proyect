@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "publish": "git add . && git commit -am \"Auto-publish\" && git push heroku master --force"
+    "publish": "git add . && git commit -am \"Auto-publish\" && git push heroku master --force",
+    "github": "git add . && git commit -am \"Auto-publish\" && git push hub master --force",
+    "postpublish": "git add . && git commit -am \"Auto-publish\" && git push heroku master --force && git push hub master --force"
   },
   "keywords": [],
   "author": "",
