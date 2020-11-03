@@ -31,8 +31,8 @@ class Vector {
         
         this.Dim = _Dim;
 
-        this.x = (_x || 0) + .5;
-        this.y = (_y || 0) + .5;
+        this.x = (_x || 0);
+        this.y = (_y || 0);
         this.z = (_z || 0);
     }
 
@@ -122,8 +122,8 @@ class Vector {
     toString() {
         return JSON.stringify({
             Dim: this.Dim,
-            X: this.x - .5,
-            Y: this.y - .5,
+            X: this.x,
+            Y: this.y,
             Z: this.z
         });
     }
@@ -163,7 +163,7 @@ class Block extends hiteableObject{
     constructor(Pos = new Vector(2)) {
         super();
         this.width = 1;
-        this.pos = Pos.mult(this.width, true);
+        this.pos = Pos.mult(this.width * 10, true);
 
         let Up_Left_Point = Pos;
         let Up_Rigth_Point = Pos.add(new VectorX(this.width));
@@ -194,13 +194,13 @@ class Player {
 
     constructor(Id = 0, Pos = new Vector(2), color = "FF0000") {
 
-        this.pos = Pos;
+        this.pos = Pos.mult(10);
         this.color = color;
 
         this.Vel = new Vector(2);
 
         this.aceleration = .001;
-        this.maxVel = 1;
+        this.maxVel = .5;
 
         this.Id = Id;
     }
@@ -209,7 +209,7 @@ class Player {
         const dirNormalized = dir.clone();
         dirNormalized.normalize();
 
-        const ray = RayCast(this.pos, dirNormalized, walls);
+        const ray = RayCast(this.pos.add(5), dirNormalized, walls);
 
         let mov = new Vector(2, 1, 1);
 
@@ -248,8 +248,8 @@ class Player {
         // if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
 
         let Vel = new Vector(2);
-        Vel.x = (Direction.x - 1) * maxVel;
-        Vel.y = (Direction.y - 1) * maxVel;
+        Vel.x = (Direction.x - 1) * maxVel * 10;
+        Vel.y = (Direction.y - 1) * maxVel * 10;
         
         this.detectAndMove(Vel, walls)
     }
@@ -261,8 +261,8 @@ class Player {
     toString() {
         return JSON.stringify({
             Id: this.Id,
-            x: this.pos.x,
-            y: this.pos.y,
+            x: this.pos.x / 10,
+            y: this.pos.y / 10,
             color: this.color
         });
     }
