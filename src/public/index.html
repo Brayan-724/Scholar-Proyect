@@ -24,6 +24,52 @@
         #loadImages{
             display: none;
         }
+
+        #mobileControls {
+            left: 30vw;
+            position: fixed;
+            top: 50vh;
+            width: 75vw;
+
+            display: none;
+        }
+
+        div#mobileControls button {
+            width: 40vw;
+            height: 20vw;
+            position: absolute;
+
+            -webkit-touch-callout: none;  /* iOS Safari */
+              -webkit-user-select: none;  /* Safari */
+               -khtml-user-select: none;  /* Konqueror HTML */
+                 -moz-user-select: none;  /* Old versions of Firefox */
+                  -ms-user-select: none;  /* Internet Explorer/Edge */
+                      user-select: none;  /* Non-prefixed version, currently
+                                        supported by Chrome, Edge, Opera and Firefox */
+        }
+
+        button#up {
+            top: -10vw;
+            left: 0vw;
+
+            transform: rotate(180deg);
+        }
+        button#down {
+            top: 10vw;
+            left: 0vw;
+        }
+        button#left {
+            top: 0vw;
+            left: -25vw;
+
+            transform: rotate(90deg);
+        }
+        button#right {
+            top: 0vw;
+            left: 25vw;
+
+            transform: rotate(-90deg);
+        }
     </style>
 </head>
 <body style="margin:0;">
@@ -32,6 +78,17 @@
         <img src="./imgs/cloud.png" alt="" id="cloudImage">
     </div>
     <canvas></canvas>
+
+    <div id="mobileControls">
+        <button id="up">V</button>
+        <button id="down">V</button>
+        <button id="left">V</button>
+        <button id="right">V</button>
+    </div>
+    <script src="js/init.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/mobile.js"></script>
+    <script src="js/pc.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

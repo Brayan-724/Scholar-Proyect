@@ -31,9 +31,9 @@ class Vector {
         
         this.Dim = _Dim;
 
-        this.x = _x || 0;
-        this.y = _y || 0;
-        this.z = _z || 0;
+        this.x = (_x || 0) + .5;
+        this.y = (_y || 0) + .5;
+        this.z = (_z || 0);
     }
 
     add(add, apply = false) {
@@ -90,6 +90,10 @@ class Vector {
     normalize() {
         let l = this.getMag();
 
+        if(l === 0) return 0;
+        if(this.x === 0) return 0;
+        if(this.y === 0) return 0;
+
         this.x /= l;
         this.y /= l;
 
@@ -104,15 +108,24 @@ class Vector {
         return new StringFunctions().encode(parseInt(n), 3);
     }
 
-    toString() {
-        if(this.Dim == 2) {
-            return this.Enum(this.x) + "/" + this.Enum(this.y);
-        } 
-        if(this.Dim == 3) {
-            return this.Enum(this.x) + "/" + this.Enum(this.y) + "/" + this.Enum(this.z);
-        }
+    clone() {
+        return new Vector(this.Dim, this.x, this.y, this.z);
+    }
 
-        return this.x.toString();
+    distance(Other = new Vector()) {
+        return Math.sqrt(
+                Math.pow(this.x - Other.x, 2) +
+                Math.pow(this.y - Other.y, 2) +
+                Math.pow(this.z - Other.z, 2))
+    }
+
+    toString() {
+        return JSON.stringify({
+            Dim: this.Dim,
+            X: this.x - .5,
+            Y: this.y - .5,
+            Z: this.z
+        });
     }
 }
 
@@ -149,7 +162,7 @@ class hiteableObject {
 class Block extends hiteableObject{
     constructor(Pos = new Vector(2)) {
         super();
-        this.width = 25;
+        this.width = 1;
         this.pos = Pos.mult(this.width, true);
 
         let Up_Left_Point = Pos;
@@ -186,60 +199,72 @@ class Player {
 
         this.Vel = new Vector(2);
 
-        this.aceleration = .5;
-        this.maxVel = 10;
+        this.aceleration = .001;
+        this.maxVel = 1;
 
         this.Id = Id;
     }
 
     detectAndMove(dir = new Vector(2), walls = [new Block()]) {
-        const dirNormalized = dir;
+        const dirNormalized = dir.clone();
         dirNormalized.normalize();
 
-        const ray = RayCast(this.pos, dirNormalized, walls, dir.getMag());
+        const ray = RayCast(this.pos, dirNormalized, walls);
 
-        let mov = new Vector(2);
+        let mov = new Vector(2, 1, 1);
 
-        if(ray !== null) {
+        if(ray.hitted) {
             mov = ray.direction;
+            console.log(ray);
         } else {
             mov = dir;
         }
+
+        // let mov = dir;
 
         this.pos.add(mov, true);
     }
 
     moveTo(Direction = new Vector(2, 1, 1), walls = [new Block()]) {
-        const Vel = this.Vel;
+        // const Vel = this.Vel;
         const maxVel = this.maxVel;
-        const aceleration = this.aceleration;
+        // const aceleration = this.aceleration;
 
-        if(Direction.x == 2) Vel.x += Vel.x + aceleration > maxVel ? 0 : aceleration;
-        else
-        if(Direction.x == 1){
-            if(Vel.x > 0) Vel.x -= aceleration;
-            if(Vel.x < 0) Vel.x += aceleration;
-        } else
-        if(Direction.x == 0) Vel.x -= Vel.x - aceleration < -maxVel ? 0 : aceleration;
+        // if(Direction.x == 2) Vel.x += Vel.x + aceleration > maxVel ? 0 : aceleration;
+        // else
+        // if(Direction.x == 1){
+        //     if(Vel.x > 0) Vel.x -= aceleration;
+        //     if(Vel.x < 0) Vel.x += aceleration;
+        // } else
+        // if(Direction.x == 0) Vel.x -= Vel.x - aceleration < -maxVel ? 0 : aceleration;
         
 
-        if(Direction.y == 2) Vel.y += Vel.y + aceleration > maxVel ? 0 : aceleration;
-        else
-        if(Direction.y == 1) {
-            if(Vel.y > 0) Vel.y -= aceleration;
-            if(Vel.y < 0) Vel.y += aceleration;
-        } else
-        if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
+        // if(Direction.y == 2) Vel.y += Vel.y + aceleration > maxVel ? 0 : aceleration;
+        // else
+        // if(Direction.y == 1) {
+        //     if(Vel.y > 0) Vel.y -= aceleration;
+        //     if(Vel.y < 0) Vel.y += aceleration;
+        // } else
+        // if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
+
+        let Vel = new Vector(2);
+        Vel.x = (Direction.x - 1) * maxVel;
+        Vel.y = (Direction.y - 1) * maxVel;
         
         this.detectAndMove(Vel, walls)
     }
 
-    update() {
-        this.moveTo(new Vector(2, 1, 1));
+    update(Walls = [new Block()]) {
+        this.moveTo(new Vector(2, 1, 1), Walls);
     }
 
     toString() {
-        return this.Id + "/" + this.pos.toString() + "/" + this.color;
+        return JSON.stringify({
+            Id: this.Id,
+            x: this.pos.x,
+            y: this.pos.y,
+            color: this.color
+        });
     }
 }
 
@@ -323,19 +348,18 @@ class Game {
                 D: false
             };
 
-            if(!anyKey) this.playersInfo[value.Id].update();
+            if(!anyKey) this.playersInfo[value.Id].update(this.level);
         });
 
         return outKeys;
     }
 
     toString() {
-        let playersInString = "";
+        let playersInString = [""]; playersInString.pop();
         for (let player of this.playersInfo) {
-            if (playersInString.length != 0) playersInString += "-";
-            playersInString += player.toString();
+            playersInString.push(player.toString())
         }
-        return join(this.totalPlayers, playersInString);
+        return JSON.stringify({players: playersInString});
     }
 }
 
@@ -364,9 +388,11 @@ function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects
             if(t > 0 && t < 1 && u > 0) {
                 const x = x1 + t * (x2 - x1);
                 const y = y1 + t * (y2 - y1);
-                if(distance(pos, new Vector(2, x, y)) < record) {
-                    record = distance(pos, new Vector(2, x, y));
-                    returnObject = new RayHit(true, new Vector(2, x, y), hiteableObjects[objectIndex], pos);
+                const pt = new Vector(2, x, y);
+
+                if(pos.distance(pt) < record) {
+                    record = pos.distance(pt);
+                    returnObject = new RayHit(true, pt, hiteableObjects[objectIndex], pos);
                 } else return;
             } else return;
         });

@@ -33,25 +33,20 @@ module.exports = {
         io.on("connect", SOCKET => {
             SOCKET.on("set", ID => {
                 io.emit("set", {
-                    playerId: game.addPlayer(new Game.Vector(2, 50, 50)).Id, 
+                    playerId: game.addPlayer(new Game.Vector(2, 1, 1)).Id, 
                     id: ID, 
                     map: levelManager.levels[1]});
             });
 
             SOCKET.on("update", (keysPressed) => {
-                const LetterInit = 1;
-                const ID = parseInt(keysPressed[0]);
-                const W = keysPressed[LetterInit + 0];
-                const S = keysPressed[LetterInit + 1];
-                const A = keysPressed[LetterInit + 2];
-                const D = keysPressed[LetterInit + 3];
+                const Keys = JSON.parse(keysPressed);
 
-                activeKeys[ID] = {
-                    Id: ID,
-                    W: (W == "1"),
-                    S: (S == "1"),
-                    A: (A == "1"),
-                    D: (D == "1")
+                activeKeys[Keys.ID] = {
+                    Id: Keys.ID,
+                    W: Keys.W,
+                    S: Keys.S,
+                    A: Keys.A,
+                    D: Keys.D
                 };
             });
         });
