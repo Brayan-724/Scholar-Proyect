@@ -248,7 +248,7 @@ class Player {
 
 		this.Vel = new Vector(2);
 
-		this.aceleration = .001;
+		this.aceleration = .01;
 		this.maxVel = 1;
 
 		this.Id = Id;

@@ -1,7 +1,7 @@
 const Lvl0 = 
 [   "XXXXXXXXXXXXXXXXXXXX",
-    "X X                X",
-    "X X                X",
+    "X                  X",
+    "X                  X",
     "X         XXXXX    X",
     "X           X      X",
     "X   S              X",
