@@ -1,11 +1,11 @@
 const Lvl0 = 
 [   "XXXXXXXXXXXXXXXXXXXX",
-    "X                  X",
-    "X                  X",
+    "X X                X",
+    "X X                X",
     "X         XXXXX    X",
-    "X                  X",
+    "X           X      X",
     "X   S              X",
-    "XXXXXXXX           X",
+    "XXXXXXXX    X      X",
     "X                  X",
     "X                  X",
     "XXXXXXXXXXXXXXXXXXXX"].join("-");
@@ -18,8 +18,8 @@ function getLevel(
         S: class Player{}, 
         Blank: null}) {
     
-    if(options.X === undefined) options.X = class Block{}
-    if(options.S === undefined) options.S = class Player{}
+    if(options.X === undefined) options.X = null;
+    if(options.S === undefined) options.S = null;
     if(options.Blank === undefined) options.Blank = null;
 
     const elements = [];

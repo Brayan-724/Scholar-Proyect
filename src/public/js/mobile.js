@@ -15,14 +15,15 @@ Keys.pop();
 
 setInterval(() => {
     const K = {ID: 0, W: false, S: false, A: false, D: false};
-    let G = false;
+
     for (let k of Keys) {
-        G = true;
         if (k.code == 87) K.W = true;
         if (k.code == 83) K.S = true;
         if (k.code == 65) K.A = true;
         if (k.code == 68) K.D = true;
     }
+
+    let G = K.W || K.S || K.A || K.D;
 
     if (G && init.ID !== null) {
         K.ID = init.ID;
