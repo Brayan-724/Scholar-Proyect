@@ -188,7 +188,7 @@ class Player {
 			if (Math.abs(this.Vel.clone().x) <= 0.01)
 				this.Vel.x = 0;
 			else
-				this.Vel.y = 0;
+				this.Vel.y = 0; 
 	}
 
 	toString() {
