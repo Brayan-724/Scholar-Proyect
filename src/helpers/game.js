@@ -183,7 +183,7 @@ class Player {
 	update(Walls = [new Block()]) {
 		if (Math.abs(this.Vel.clone().x) >= 0.01 ||
 			Math.abs(this.Vel.clone().y) >= 0.01)
-			this.moveTo(new Vector(2, 1, 1), Walls);
+			this.moveTo(new Vector(2, 1, 2), Walls);
 		else
 			if (Math.abs(this.Vel.clone().x) <= 0.01)
 				this.Vel.x = 0;
