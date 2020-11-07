@@ -1,18 +1,20 @@
-const ONLINE = io();
+if (!globalThis.io) alert("Unexpected error\n Refresh the page");
+globalThis.ONLINE = globalThis.io();
+
 
 setInterval(() => {
-    if(detectMob())
-        initMobile()
+    if (globalThis.detectMob())
+        globalThis.initMobile();
     else
-        initPC()
+        globalThis.initPC();
 }, 1000)
 
-Init(ONLINE);
+globalThis.Init(globalThis.ONLINE);
 
-ONLINE.on("update", (data) => {
-    if(init.ID === null) return;
-    
-    globalThis.drawMap(MapIndexes)
+globalThis.ONLINE.on("update", (data) => {
+    if (globalThis.init.ID === null) return;
+
+    globalThis.drawMap(globalThis.MapIndexes)
 
     globalThis.drawPlayers(data);
 })

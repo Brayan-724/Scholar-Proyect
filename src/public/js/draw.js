@@ -7,7 +7,7 @@
     const gtx = document.querySelector("canvas").getContext("2d");
     const T = () => {
         const width = window.innerWidth;
-        const heigth = window.innerHeight;
+        //const heigth = window.innerHeight;
 
         gtx.canvas.width = width;
         gtx.canvas.height = width * 0.5;
@@ -35,7 +35,7 @@
             const Y = pos[1];
 
             if(type === "Block") 
-                gtx.drawImage(tex.Block, X * Aspect, Y * Aspect, Aspect, Aspect);
+                gtx.drawImage(globalThis.tex.Block, X * Aspect, Y * Aspect, Aspect, Aspect);
         }
     });
 
@@ -53,7 +53,7 @@
             }
             const color = player.color;
 
-            gtx.fillStyle = player.Id === init.ID ? ("#00F00F") : ("#" + color);
+            gtx.fillStyle = player.Id === globalThis.init.ID ? ("#00F00F") : ("#" + color);
             gtx.fillRect(pos.x * Aspect, pos.y * Aspect, Aspect, Aspect);
         }
     });

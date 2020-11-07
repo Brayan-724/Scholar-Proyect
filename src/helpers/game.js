@@ -1,5 +1,9 @@
+"use strict"
 const levelManager = require('./levels');
-const Maths = require("./Maths");
+// const Maths = require("./Maths");
+const Vector = require("./Vector");
+
+
 
 // Helper with string converts
 class StringFunctions {
@@ -20,190 +24,13 @@ class StringFunctions {
 	}
 }
 
-// Vector3D or Vector2D
-class Vector {
+class VectorX extends Vector { constructor(X = 0) { super(2, X) } }
+class VectorY extends Vector { constructor(Y = 0) { super(2, 0, Y) } }
+class VectorAll extends Vector { constructor(N = 0) { super(2, N, N) } }
 
-	constructor(
-		_Dim = 2,
-		_x = 0,
-		_y = 0,
-		_z = 0) {
-		
-		this.Dim = _Dim;
 
-		this.x = (_x || 0);
-		this.y = (_y || 0);
-		this.z = (_z || 0);
-	}
-
-	invertX(apply = false) {
-		const X = -this.x;
-		if(apply) this.x = X;
-		return new Vector(2, X, this.y);
-	}
-
-	invertY(apply = false) {
-		const Y = -this.y;
-		if(apply) this.y = Y;
-		return new Vector(2, this.x, Y);
-	}
-
-	invert(apply = false) {
-		const V = this.invertX();
-		V.invertY(true);
-
-		if(apply){
-			this.x = V.x;
-			this.y = V.y;
-		}
-
-		return V
-	}
-
-	add(add, apply = false) {
-		if(add instanceof Vector) {
-			if(apply) {
-				this.x += add.x;
-				this.y += add.y;
-			}
-			return new Vector(2, this.x + add.x, this.y + add.y);
-		}
-		if(typeof add == "number") {
-			if(apply) {
-				this.x += add;
-				this.y += add;
-			}
-			return new Vector(2, this.x + add, this.y + add);
-		}
-	}
-
-	sub(add, apply = false) {
-		if(add instanceof Vector) {
-			if(apply) {
-				this.x -= add.x;
-				this.y -= add.y;
-			}
-			return new Vector(2, this.x - add.x, this.y - add.y);
-		}
-		if(typeof add == "number") {
-			if(apply) {
-				this.x -= add;
-				this.y -= add;
-			}
-			return new Vector(2, this.x - add, this.y - add);
-		}
-	}
-
-	mult(add, apply = false) {
-		if(add instanceof Vector) {
-			if(apply) {
-				this.x *= add.x;
-				this.y *= add.y;
-			}
-			return new Vector(2, this.x * add.x, this.y * add.y);
-		}
-		if(typeof add == "number") {
-			if(apply) {
-				this.x *= add;
-				this.y *= add;
-			}
-			return new Vector(2, this.x * add, this.y * add);
-		}
-	}
-
-	div(add, apply = false) {
-		if(add instanceof Vector) {
-			if(apply) {
-				this.x /= add.x;
-				this.y /= add.y;
-			}
-			return new Vector(2, this.x / add.x, this.y / add.y);
-		}
-		if(typeof add == "number") {
-			if(apply) {
-				this.x /= add;
-				this.y /= add;
-			}
-			return new Vector(2, this.x / add, this.y / add);
-		}
-	}
-
-	normalize() {
-		let l = this.getMag();
-
-		if(l === 0) return this;
-
-		if(this.x === 0) return this;
-		if(this.y === 0) return this;
-
-		this.x /= l;
-		this.y /= l;
-
-		return this;
-	}
-
-	getMag() {
-		return Math.sqrt((this.x ** 2) + (this.y ** 2) + (this.z ** 2));
-	}
-
-	Enum(n = 0) {
-		return new StringFunctions().encode(parseInt(n), 3);
-	}
-
-	clone() {
-		return new Vector(this.Dim, this.x, this.y, this.z);
-	}
-
-	distance(Other = new Vector()) {
-		return Math.sqrt(
-				Math.pow(this.x - Other.x, 2) +
-				Math.pow(this.y - Other.y, 2) +
-				Math.pow(this.z - Other.z, 2))
-	}
-
-	toString() {
-		return JSON.stringify({
-			Dim: this.Dim,
-			X: this.x,
-			Y: this.y,
-			Z: this.z
-		});
-	}
-}
-
-class VectorX extends Vector{constructor(X = 0) {super(2, X)}}
-class VectorY extends Vector{constructor(Y = 0) {super(2, 0, Y)}}
-class VectorAll extends Vector {constructor(N = 0) {super(2, N, N)}}
-
-class RayWall {
-	constructor(PosA = new Vector(2), PosB = new Vector(2)) {
-		this.A = PosA;
-		this.B = PosB;
-	}
-}
-
-class RayHit {
-	constructor(hitted = false, Pos = new Vector(2), Object = new hiteableObject(), rayPos = new Vector(2)) {
-		this.hitted = hitted;
-		if(!hitted) return;
-		this.pos = Pos;
-		this.objectHit = Object;
-		this.rayPos = rayPos;
-
-		this.direction = new Vector(2, this.pos.x - rayPos.x, this.pos.y - rayPos.y);
-		this.angle = Maths.getAngle(this.direction.x, this.direction.y);
-		this.distance = this.direction.getMag();
-	}
-}
-
-class hiteableObject {
-	constructor(){}
-	getWalls(){ return [new RayWall()]}
-}
-
-class Block extends hiteableObject{
+class Block{
 	constructor(Pos = new Vector(2)) {
-		super();
 		this.width = 1;
 		this.pos = Pos.mult(this.width, true);
 
@@ -211,13 +38,6 @@ class Block extends hiteableObject{
 		let Up_Rigth_Point = Pos.add(new VectorX(this.width));
 		let Down_Left_Point = Pos.add(new VectorY(this.width));
 		let Down_Rigth_Point = Pos.add(new VectorAll(this.width));
-		
-		this.Walls = [
-			new RayWall(Up_Left_Point, Up_Rigth_Point),
-			new RayWall(Down_Left_Point, Down_Rigth_Point),
-			new RayWall(Up_Left_Point, Down_Left_Point),
-			new RayWall(Up_Rigth_Point, Down_Rigth_Point),
-		];
 
 		this.points = [
 			Up_Left_Point,
@@ -226,13 +46,9 @@ class Block extends hiteableObject{
 			Down_Rigth_Point
 		]
 	}
-
-	getWalls() {
-		return this.Walls;
-	}
 }
 
-class BlockXY extends Block{
+class BlockXY extends Block {
 	constructor(x = 0, y = 0) {
 		super(new Vector(2, x, y));
 	}
@@ -244,6 +60,7 @@ class Player {
 	constructor(Id = 0, Pos = new Vector(2), color = "FF0000") {
 
 		this.pos = Pos;
+		this.width = 1;
 		this.color = color;
 
 		this.Vel = new Vector(2);
@@ -252,65 +69,126 @@ class Player {
 		this.maxVel = 1;
 
 		this.Id = Id;
+		this.MoveAve = true;
 	}
 
-	checkCollision(B = new Block()) { 
+	checkCollision(B = new Block()) {
+		const L = 0.009;
 		return (
-			(this.pos.x < B.pos.x + B.width && 
-			 this.pos.x + 1 > B.pos.x)
-			&& 
-			(this.pos.y < B.pos.y + B.width &&
-			 this.pos.y + 1 > B.pos.y)
+			(this.pos.x + L < B.pos.x + B.width &&
+				this.pos.x - L + this.width > B.pos.x)
+			&&
+			(this.pos.y + L < B.pos.y + B.width &&
+				this.pos.y - L + this.width > B.pos.y)
 		)
 	}
 
 	checkCollisions(BS = [new Block()]) {
-		for(let B of BS)
-			if(this.checkCollision(B))
+		for (let B of BS)
+			if (this.checkCollision(B))
 				return true;
 
 		return false;
 	}
 
-	detectAndMove(dir = new Vector(2), walls = [new Block()]) {
-		this.pos.add(dir, true);
-		if(!this.checkCollisions(walls)) {
-			this.pos.add(dir, true);
-		} else {
-			this.Vel = new Vector(2);
+	interClass_DTM(pos = new Vector(), posible = false, MX = 0, MY = 0) {
+		return new (class detectAndMoveReturn {
+			constructor(pos = new Vector(), posible = false, MX = 0, MY = 0) {
+				this.pos = pos;
+				this.posible = posible;
+				this.MoveX = MX;
+				this.MoveY = MY;
+			}
 
-			// this.detectAndMove(dir.clone().normalize().mult(this.aceleration), walls);
+			run() {
+				return this.pos.add(new Vector(2, this.MoveX, this.MoveY));
+			}
+		})(pos, posible, MX, MY)
+	}
+
+	detectY(YMove = 0, walls = [new Block()]) {
+		this.pos.add(new VectorY(YMove), true);
+		const P = this.checkCollisions(walls);
+		this.pos.sub(new VectorY(YMove), true);
+
+		return !P;
+	}
+
+	detectX(XMove = 0, walls = [new Block()]) {
+		this.pos.add(new VectorX(XMove), true);
+		const P = this.checkCollisions(walls);
+		this.pos.sub(new VectorX(XMove), true);
+
+		return !P;
+	}
+
+	detectAndMove(dir = new Vector(2), walls = [new Block()]) {
+		let DX = this.detectX(dir.x / 2, walls);
+		let DY = this.detectY(dir.y / 2, walls);
+
+		if(DX && DY) {
+			DX = this.detectX(dir.x, walls);
+			DY = this.detectY(dir.y, walls);
+
+			if(DX && DY)
+				this.pos.add(dir, true);
+			else {
+				this.detectAndMove(dir.clone().mult(.75, true), walls);
+			}
+		} else {
+			if(dir.getMag() > 0.001)
+				this.detectAndMove(dir.clone().div(2, true), walls);
+			else {
+				this.pos.add(new Vector(2, 
+					DX ? this.Vel.x : 0,
+					DY ? this.Vel.y : 0), true);
+
+				this.Vel = new Vector(2);
+			}
 		}
-		this.pos.sub(dir, true);
+
+		return {X: true, Y: true}
 	}
 
 	moveTo(Direction = new Vector(2, 1, 1), walls = [new Block()]) {
-		const Vel = this.Vel;
-		const maxVel = this.maxVel;
-		const aceleration = this.aceleration;
+		//if(!this.MoveAve) return 0;
+		const Vel = this.Vel.clone();
+		const maxVel = this.maxVel + 0;
+		const aceleration = this.aceleration + 0;
 
-		if(Direction.x == 2) Vel.x += Vel.x + aceleration > maxVel ? 0 : aceleration;
+		if (Direction.x == 2) Vel.x += Vel.x + aceleration > maxVel ? 0 : aceleration;
 		else
-		if(Direction.x == 1){
-		    if(Vel.x > 0) Vel.x -= aceleration;
-		    if(Vel.x < 0) Vel.x += aceleration;
-		} else
-		if(Direction.x == 0) Vel.x -= Vel.x - aceleration < -maxVel ? 0 : aceleration;
-		
+			if (Direction.x == 1) {
+				if (Vel.x >= aceleration) Vel.x -= aceleration;
+				if (Vel.x <= -aceleration) Vel.x += aceleration;
+			} else
+				if (Direction.x == 0) Vel.x -= Vel.x - aceleration < -maxVel ? 0 : aceleration;
 
-		if(Direction.y == 2) Vel.y += Vel.y + aceleration > maxVel ? 0 : aceleration;
+
+		if (Direction.y == 2) Vel.y += Vel.y + aceleration > maxVel ? 0 : aceleration;
 		else
-		if(Direction.y == 1) {
-		    if(Vel.y > 0) Vel.y -= aceleration;
-		    if(Vel.y < 0) Vel.y += aceleration;
-		} else
-		if(Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
-		
-		this.detectAndMove(Vel, walls)
+			if (Direction.y == 1) {
+				if (Vel.y >= aceleration) Vel.y -= aceleration;
+				if (Vel.y <= -aceleration) Vel.y += aceleration;
+			} else
+				if (Direction.y == 0) Vel.y -= Vel.y - aceleration < -maxVel ? 0 : aceleration;
+
+		this.Vel = Vel;
+
+		this.detectAndMove(Vel, walls);
+
+		//return 1;
 	}
 
 	update(Walls = [new Block()]) {
-		this.moveTo(new Vector(2, 1, 1), Walls);
+		if (Math.abs(this.Vel.clone().x) >= 0.01 ||
+			Math.abs(this.Vel.clone().y) >= 0.01)
+			this.moveTo(new Vector(2, 1, 1), Walls);
+		else
+			if (Math.abs(this.Vel.clone().x) <= 0.01)
+				this.Vel.x = 0;
+			else
+				this.Vel.y = 0;
 	}
 
 	toString() {
@@ -359,8 +237,8 @@ class Game {
 	movePlayer(Id = 0, DirectionX = 1, DirectionY = 1) {
 		this.playersInfo[Id]
 			.moveTo(new Vector(2, DirectionX, DirectionY), this.level);
-		
-			return this;
+
+		return this;
 	}
 
 	setLevel(levelId = 0) {
@@ -373,37 +251,37 @@ class Game {
 
 	update(
 		Keys = [{
-			Id: 0, 
-			W: false, 
-			S: false, 
-			A: false, 
+			Id: 0,
+			W: false,
+			S: false,
+			A: false,
 			D: false
 		}]) {
 
 		let outKeys = Keys;
-		
-		Keys.forEach((value, index) => {
+
+		Keys.forEach((value) => {
 			let anyKey = value.W || value.S || value.A | value.D;
 
 			let XMove = 1;
 			let YMove = 1;
 
-			if(value.W) YMove -= 1;
-			if(value.S) YMove += 1;
-			if(value.A) XMove -= 1;
-			if(value.D) XMove += 1;
+			if (value.W) YMove -= 1;
+			if (value.S) YMove += 1;
+			if (value.A) XMove -= 1;
+			if (value.D) XMove += 1;
 
-			if(anyKey) this.movePlayer(value.Id, XMove, YMove);
+			if (anyKey) this.movePlayer(value.Id, XMove, YMove);
 
 			outKeys[value.Id] = {
-				Id: value.Id, 
-				W: false, 
-				S: false, 
-				A: false, 
+				Id: value.Id,
+				W: false,
+				S: false,
+				A: false,
 				D: false
 			};
 
-			if(!anyKey) this.playersInfo[value.Id].update(this.level);
+			if (!anyKey) this.playersInfo[value.Id].update(this.level);
 		});
 
 		return outKeys;
@@ -414,70 +292,60 @@ class Game {
 		for (let player of this.playersInfo) {
 			playersInString.push(player.toString())
 		}
-		return JSON.stringify({players: playersInString});
+		return JSON.stringify({ players: playersInString });
 	}
 }
 
-function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects = [new hiteableObject()], maxDistance = Infinity) {
-	const x3 = pos.x;
-	const y3 = pos.y;
-	const x4 = direction.x + x3;
-	const y4 = direction.y + y3;
+// Calculate Raycast
+// function RayCast(pos = new Vector(2), direction = new Vector(2), hiteableObjects = [new hiteableObject()], maxDistance = Infinity) {
+// 	const x3 = pos.x;
+// 	const y3 = pos.y;
+// 	const x4 = direction.x + x3;
+// 	const y4 = direction.y + y3;
 
-	let returnObject = new RayHit(false);
-	let record = maxDistance;
-	
-	hiteableObjects.forEach((object, objectIndex) => {
-		object.getWalls().forEach((wall) => {
-			const x1 = wall.A.x;
-			const y1 = wall.A.y;
-			const x2 = wall.B.x;
-			const y2 = wall.B.y;
+// 	let returnObject = new RayHit(false);
+// 	let record = maxDistance;
 
-			const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-			if(den == 0) return;
+// 	hiteableObjects.forEach((object, objectIndex) => {
+// 		object.getWalls().forEach((wall) => {
+// 			const x1 = wall.A.x;
+// 			const y1 = wall.A.y;
+// 			const x2 = wall.B.x;
+// 			const y2 = wall.B.y;
 
-			const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
-			const u = ((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+// 			const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+// 			if (den == 0) return;
 
-			if(t > 0 && t < 1 && u > 0) {
-				const x = x1 + t * (x2 - x1);
-				const y = y1 + t * (y2 - y1);
-				const pt = new Vector(2, x, y);
+// 			const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+// 			const u = ((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
-				if(pos.distance(pt) < record) {
-					record = pos.distance(pt);
-					returnObject = new RayHit(true, pt, hiteableObjects[objectIndex], pos);
-				} else return;
-			} else return;
-		});
-	});
+// 			if (t > 0 && t < 1 && u > 0) {
+// 				const x = x1 + t * (x2 - x1);
+// 				const y = y1 + t * (y2 - y1);
+// 				const pt = new Vector(2, x, y);
 
-	return returnObject;
-}
+// 				if (pos.distance(pt) < record) {
+// 					record = pos.distance(pt);
+// 					returnObject = new RayHit(true, pt, hiteableObjects[objectIndex], pos);
+// 				} else return;
+// 			} else return;
+// 		});
+// 	});
+
+// 	return returnObject;
+// }
 
 function stringToArray(str = "") {
-	let out = [];
-	for(let i = 0; i < str.length; i++) {
-		out.push(str[i]);
-	}
-
-	return out;
+	return [...str];
 }
 
 function join(...args) {
-	let resultString = "";
-	for (let Num of args) {
-		if (resultString.length != 0) resultString += "|";
-		resultString += Num;
-	}
-
-	return resultString;
+	return args.join(" | ");
 }
 
-function distance(VecA, VecB) {
-	return Math.sqrt((VecA.x - VecB.x) + (VecA.y - VecB.y));
-}
+// function distance(VecA = new Vector(), VecB = new Vector()) {
+// 	return Math.sqrt((VecA.x - VecB.x) + (VecA.y - VecB.y));
+// }
 
 
 module.exports = {
